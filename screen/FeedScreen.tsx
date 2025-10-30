@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import ReportCard from "../components/ReportCard";
+import { useNavigation } from '@react-navigation/native';
+
 
 interface Report {
   id: string;
@@ -43,11 +45,16 @@ const reports: Report[] = [
 ];
 
 export default function FeedScreen() {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Feed de Reportes</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton}
+        onPress={() => navigation.navigate("AddReport" as never)}>
+
+
           <Text style={styles.addText}>+ Agregar</Text>
         </TouchableOpacity>
       </View>

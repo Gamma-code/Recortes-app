@@ -1,12 +1,28 @@
-import React from "react";
-import { SafeAreaView, StatusBar } from "react-native";
-import FeedScreen from "./screen/pantallaRecorte";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Importa tus pantallas
+import ReportFeedScreen from './screen/FeedScreen';
+import AddReportScreen from './screen/AddReportScreen';
+//import LoginScreen from './screen/LoginScreen';
+
+// Crea el stack
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <StatusBar barStyle="dark-content" />
-      <FeedScreen />
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="ReportFeed"
+        screenOptions={{
+          headerShown: false, // Oculta el encabezado
+        }}
+      >
+        
+        <Stack.Screen name="ReportFeed" component={ReportFeedScreen} />
+        <Stack.Screen name="AddReport" component={AddReportScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
