@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 
 interface Report {
   id: string;
@@ -7,7 +7,7 @@ interface Report {
   location: string;
   time: string;
   description: string;
-  image: string;
+  image: string; // URI del archivo (por ejemplo: file:///...)
 }
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
 export default function ReportCard({ report }: Props) {
   return (
     <View style={styles.card}>
+      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.name}>{report.name}</Text>
@@ -25,16 +26,19 @@ export default function ReportCard({ report }: Props) {
         <Text style={styles.time}>{report.time}</Text>
       </View>
 
+      {/* Imagen del reporte */}
       <View style={styles.imageBox}>
-
-        <Text style={styles.imageText}>Imagen del reporte</Text>
-        <Text style={styles.emoji}>{report.image}</Text>
+        {report.image ? (
+          <Image source={{ uri: report.image }} style={styles.image} />
+        ) : (
+          <Text style={styles.imageText}>Sin imagen</Text>
+        )}
       </View>
 
+      {/* Descripción */}
       <Text style={styles.description}>{report.description}</Text>
 
-      
-      
+      {/* Botones de acción */}
       <View style={styles.actions}>
         <TouchableOpacity style={styles.button}>
           <Text>👍 Me gusta</Text>
@@ -83,18 +87,20 @@ const styles = StyleSheet.create({
   imageBox: {
     backgroundColor: "#f2f2f2",
     borderRadius: 10,
-    height: 150,
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
+    overflow: "hidden", // asegura que la imagen respete el borde redondeado
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   imageText: {
     color: "#888",
     fontSize: 14,
-    marginBottom: 4,
-  },
-  emoji: {
-    fontSize: 30,
   },
   description: {
     fontSize: 14,

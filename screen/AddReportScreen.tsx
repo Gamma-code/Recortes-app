@@ -1,34 +1,133 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image, TextInput, StyleSheet, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from "react-native";
+import * as Location from "expo-location";
+import * as ImagePicker from "expo-image-picker";
+import { useReports } from "../Save/ReportSave";
+import { useNavigation } from "@react-navigation/native";
 
 export default function AddReportScreen() {
+  const [locationName, setLocationName] = useState("Ubicación no detectada");
+  const [image, setImage] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+
+  const { addReport } = useReports();
+  const navigation = useNavigation();
+
+  // 📍 Obtener ubicación actual
+  const handleGetLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permiso denegado", "Se necesita acceso a la ubicación.");
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const reverse = await Location.reverseGeocodeAsync(loc.coords);
+
+      if (reverse.length > 0) {
+        const { city, region, street } = reverse[0];
+        setLocationName(`${street || ""}, ${city || ""}, ${region || ""}`);
+      } else {
+        setLocationName("Ubicación detectada, pero sin nombre disponible");
+      }
+    } catch (error) {
+      Alert.alert("Error", "No se pudo obtener la ubicación.");
+    }
+  };
+
+  // 📸 Tomar una foto
+  const handleSelectImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permiso denegado", "Se necesita acceso a la cámara.");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+      
+
+
+
+    } catch (error) {
+      Alert.alert("Error", "No se pudo abrir la cámara.");
+    }
+  };
+
+  // 📤 Enviar reporte y guardarlo en el contexto
+  const handleSubmit = () => {
+  if (!description || !image || locationName === "Ubicación no detectada") {
+    Alert.alert("Faltan datos", "Completa todos los campos antes de enviar.");
+    return;
+  }
+
+  addReport({
+    name: "Usuario anónimo", 
+    location: locationName,
+    image: image!,
+    description,
+  });
+
+  Alert.alert("✅ Reporte enviado", "Tu reporte se ha registrado correctamente.");
+  setDescription("");
+  setImage(null);
+  setLocationName("Ubicación no detectada");
+};
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Nuevo Reporte</Text>
 
-      {/*para la ubicacion*/}
-      <Text style={styles.label}>Ubicacion</Text>
-      <TouchableOpacity style={styles.locationButton}>
+      {/* 📍 Ubicación */}
+      <Text style={styles.label}>Ubicación</Text>
+      <TouchableOpacity style={styles.locationButton} onPress={handleGetLocation}>
         <Text style={styles.locationButtonText}>Actualizar ubicación</Text>
       </TouchableOpacity>
-      <Text style={styles.locationText}>Stockton St 1-99, San Francisco, CA</Text>
+      <Text style={styles.locationText}>{locationName}</Text>
 
-      {/*Para la imagen*/}
+      {/* 📸 Imagen */}
       <Text style={styles.label}>Imagen</Text>
-      <TouchableOpacity style={styles.imageBox}>
-        <Text style={styles.imageText}>Toca para agregar imagen</Text>
+      <TouchableOpacity style={styles.imageBox} onPress={handleSelectImage}>
+        {image ? (
+          <Image
+            source={{ uri: image }}
+            style={{ width: "100%", height: "100%", borderRadius: 10 }}
+          />
+        ) : (
+          <Text style={styles.imageText}>Toca para agregar imagen</Text>
+        )}
       </TouchableOpacity>
 
-      {/*para la desripcion*/}
-      <Text style={styles.label}>Descripcion</Text>
+      {/* 📝 Descripción */}
+      <Text style={styles.label}>Descripción</Text>
       <TextInput
         style={styles.textInput}
         multiline
+        value={description}
+        onChangeText={setDescription}
         placeholder="Describe el problema que quieres reportar..."
       />
 
-      {/*Boton */}
-      <TouchableOpacity style={styles.submitButton}>
+      {/* 📤 Botón enviar */}
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitText}>Enviar Reporte</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -76,9 +175,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
-  },
-  imagePlaceholder: {
-    fontSize: 32,
   },
   imageText: {
     color: "#888",

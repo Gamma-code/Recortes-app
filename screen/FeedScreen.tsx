@@ -1,76 +1,43 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import ReportCard from "../components/ReportCard";
-import { useNavigation } from '@react-navigation/native';
-
-
-interface Report {
-  id: string;
-  name: string;
-  location: string;
-  time: string;
-  description: string;
-  image: string;
-}
-
-
-//Aqui puse los ejemplos de las tarjetas
-const reports: Report[] = [
-  {
-    id: "1",
-    name: "Brayan Gamaliel",
-    location: "La paz",
-    time: "Hace 2 horas",
-    description: "Problema con el alumbrado público en la calle principal",
-    image: "😎",
-  },
-  {
-    id: "2",
-    name: "Brayan Gamaliel",
-    location: "La Paz",
-    time: "Hace 2 horas",
-    description: "Basura acumulada en los contenedores del parque",
-    image: "😎",
-  },
-  {
-    id: "3",
-    name: "Brayan Gamaliel",
-    location: "La Paz",
-    time: "Hace 2 horas",
-    description: "Basura acumulada en los contenedores del parque",
-    image: "😎",
-  },
-
-
-];
+import { useNavigation } from "@react-navigation/native";
+import { useReports } from "../Save/ReportSave";
 
 export default function FeedScreen() {
   const navigation = useNavigation();
+  const { reports } = useReports();
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Feed de Reportes</Text>
-        <TouchableOpacity style={styles.addButton}
-        onPress={() => navigation.navigate("AddReport" as never)}>
-
-
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("AddReport" as never)}
+        >
           <Text style={styles.addText}>+ Agregar</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Lista de reportes */}
       <FlatList
         data={reports}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <ReportCard report={item} />}
         contentContainerStyle={{ paddingBottom: 20 }}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 40, color: "#666" }}>
+            No hay reportes aún. ¡Agrega uno!
+          </Text>
+        }
       />
     </View>
   );
 }
 
-
-//Diseño de la app 
+// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
